@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UJJVAL SAMITI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:#eee;font-family:Arial}
+header{text-align:center;padding:20px;background:#080808;border-bottom:2px solid #d4af37}
+h1,h2,h3{color:#d4af37}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:12px;background:#191919}
+button{background:#d4af37;color:#111;border:0;border-radius:7px;padding:12px;margin:5px;font-weight:bold}
+input,textarea{display:block;width:100%;padding:12px;margin:10px 0;background:#252525;color:white;border:1px solid #777;border-radius:7px}
+main{max-width:750px;margin:auto;padding:15px}
+section{display:none}
+section.active{display:block}
+.card{background:#1c1c1c;border:1px solid #6b561b;border-radius:12px;padding:17px;margin:15px 0}
+.small{color:#aaa;font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>UJJVAL SAMITI</h1><p>संगठन • एकता • विकास</p></header>
+<nav>
+<button onclick="show('home')">होम</button>
+<button onclick="show('register')">पंजीकरण</button>
+<button onclick="show('login')">OTP Login</button>
+<button onclick="show('profile')">प्रोफाइल</button>
+<button onclick="logout()">Logout</button>
+</nav>
+<main>
+<section id="home" class="active">
+<div class="card">
+<h2>UJJVAL SAMITI Online</h2>
+<p>ऑनलाइन सदस्य प्रणाली</p>
+<p id="connection">Firebase कॉन्फ़िगरेशन बाकी है</p>
+</div>
+</section>
+
+<section id="register">
+<div class="card">
+<h2>सदस्य पंजीकरण</h2>
+<input id="rname" placeholder="पूरा नाम">
+<input id="rphone" type="tel" placeholder="मोबाइल नंबर (10 अंक)" maxlength="10">
+<input id="rvillage" placeholder="गाँव">
+<textarea id="raddress" placeholder="पूरा पता"></textarea>
+<button onclick="sendOTP('register')">OTP भेजें</button>
+</div>
+</section>
+
+<section id="login">
+<div class="card">
+<h2>सदस्य OTP Login</h2>
+<input id="lphone" type="tel" placeholder="मोबाइल नंबर (10 अंक)" maxlength="10">
+<button onclick="sendOTP('login')">OTP भेजें</button>
+</div>
+</section>
+
+<section id="verify">
+<div class="card">
+<h2>OTP सत्यापन</h2>
+<input id="otp" placeholder="6 अंकों का OTP" maxlength="6">
+<button onclick="verifyOTP()">OTP सत्यापित करें</button>
+<div id="recaptcha-container"></div>
+</div>
+</section>
+
+<section id="profile">
+<div class="card">
+<h2>मेरी प्रोफाइल</h2>
+<div id="details">लॉगिन करें</div>
+</div>
+</section>
+</main>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,RecaptchaVerifier,signInWithPhoneNumber,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyDG--9UW5sIVNvYnHO1U_Bv5S7lXGIisro",
+authDomain: "ujjval-samiti.firebaseapp.com",
+projectId: "ujjval-samiti",
+storageBucket: "ujjval-samiti.firebasestorage.app",
+messagingSenderId: "595088837715",
+appId: "1:595088837715:web:f094353dcaea9e2017caa6"
+};/* Firebase Console से अपनी Configuration यहाँ डालें */
+
+let app,auth,db,confirmation;
+let mode="login";
+let pendingMember=null;
+
+function configured(){
+ return !Object.values(firebaseConfig).some(v=>String(v).startsWith("YOUR_"));
+}
+
+if(configured()){
+ try{
+  app=initializeApp(firebaseConfig);
+  auth=getAuth(app);
+  db=getFirestore(app);
+  document.getElementById("connection").textContent="Firebase कॉन्फ़िगरेशन तैयार";
+ }catch(e){
+  document.getElementById("connection").textContent="Firebase Error: "+e.message;
+ }
+}else{
+ document.getElementById("connection").textContent="Firebase Configuration डालना बाकी है";
+}
+
+window.show=function(id){
+ document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ if(id==="profile")loadProfile();
+};
+
+function fullPhone(phone){
+ phone=phone.replace(/\D/g,"");
+ if(phone.length===10)return "+91"+phone;
+ if(phone.startsWith("91")&&phone.length===12)return "+"+phone;
+ return null;
+}
+
+window.sendOTP=async function(which){
+ alert("OTP बटन क्लिक हुआ");
+ alert("Firebase Auth जांच: "+Boolean(auth));
+ if(!auth){
+  alert("पहले Firebase Configuration डालें");
+  return;
+ }
+ mode=which;
+ const phone=fullPhone(which==="register"
+  ?document.getElementById("rphone").value
+  :document.getElementById("lphone").value);
+
+ if(!phone){
+  alert("सही मोबाइल नंबर डालें");
+  return;
+ }
+
+ if(which==="register"){
+  const name=document.getElementById("rname").value.trim();
+  const village=document.getElementById("rvillage").value.trim();
+  if(!name||!village){
+   alert("नाम और गाँव भरें");
+   return;
+  }
+  pendingMember={
+   name,
+   phone,
+   village,
+   address:document.getElementById("raddress").value.trim()
+  };
+ }
+
+ try{
+  alert("Recaptcha शुरू हो रहा है");
+  if(!window.recaptchaVerifier){
+   window.recaptchaVerifier=new RecaptchaVerifier(auth,"recaptcha-container",{
+    size:"normal"
+   });
+  }
+  confirmation=await signInWithPhoneNumber(auth,phone,window.recaptchaVerifier);
+  alert("OTP अनुरोध पूरा हुआ");
+  show("verify");
+  alert("OTP भेज दिया गया");
+ }catch(e){
+  alert("OTP Error: "+e.message);
+  if(window.recaptchaVerifier){
+   window.recaptchaVerifier.clear();
+   window.recaptchaVerifier=null;
+  }
+ }
+};
+
+window.verifyOTP=async function(){
+ const code=document.getElementById("otp").value.trim();
+ if(!confirmation||code.length<6){
+  alert("सही OTP डालें");
+  return;
+ }
+ try{
+  const result=await confirmation.confirm(code);
+  const user=result.user;
+  const phone=user.phoneNumber;
+  const ref=doc(db,"members",user.uid);
+  const snap=await getDoc(ref);
+
+  if(mode==="register"){
+   if(snap.exists()){
+    alert("यह सदस्य पहले से पंजीकृत है");
+   }else{
+    const id="UJJ"+user.uid.slice(-8).toUpperCase();
+    await setDoc(ref,{
+     id,
+     uid:user.uid,
+     name:pendingMember.name,
+     phone,
+     village:pendingMember.village,
+     address:pendingMember.address,
+     joinDate:new Date().toISOString(),
+     status:"Active"
+    });
+   }
+  }else if(!snap.exists()){
+   alert("सदस्य रिकॉर्ड नहीं मिला। पहले पंजीकरण करें।");
+   await signOut(auth);
+   show("login");
+   return;
+  }
+
+  document.getElementById("otp").value="";
+  show("profile");
+  await loadProfile();
+ }catch(e){
+  alert("OTP सत्यापन विफल: "+e.message);
+ }
+};
+
+async function loadProfile(){
+ if(!auth||!auth.currentUser){
+  document.getElementById("details").textContent="पहले OTP Login करें";
+  return;
+ }
+ try{
+  const snap=await getDoc(doc(db,"members",auth.currentUser.uid));
+  if(!snap.exists()){
+   document.getElementById("details").textContent="सदस्य रिकॉर्ड नहीं मिला";
+   return;
+  }
+  const m=snap.data();
+  document.getElementById("details").innerHTML=`
+  <h3>${escapeHTML(m.name)}</h3>
+  <p>Member ID: ${escapeHTML(m.id)}</p>
+  <p>Mobile: ${escapeHTML(m.phone)}</p>
+  <p>Village: ${escapeHTML(m.village)}</p>
+  <p>Address: ${escapeHTML(m.address||"")}</p>
+  <p>Status: ${escapeHTML(m.status||"Active")}</p>`;
+ }catch(e){
+  document.getElementById("details").textContent="लोड करने में समस्या: "+e.message;
+ }
+}
+
+function escapeHTML(v){
+ return String(v||"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+window.logout=async function(){
+ if(auth&&auth.currentUser){
+  await signOut(auth);
+ }
+ show("home");
+ alert("Logout हो गया");
+};
+
+</script>
+</body>
+</html>

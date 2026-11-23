@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UJJVAL SAMITI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:#f5f5f5;font-family:Arial,sans-serif}
+header{background:#080808;border-bottom:2px solid #c9a227;padding:20px;text-align:center}
+header h1{color:#e6c45a;margin:0;font-size:27px}
+header p{color:#bbb;margin:7px 0 0}
+nav{display:flex;flex-wrap:wrap;gap:7px;padding:12px;background:#181818;justify-content:center}
+button{background:#c9a227;color:#111;border:0;padding:11px 14px;border-radius:7px;font-weight:bold;cursor:pointer;margin:3px}
+.secondary{background:#333;color:white}
+.danger{background:#a52a2a;color:white}
+main{max-width:850px;margin:auto;padding:15px}
+.section{display:none}
+.section.active{display:block}
+.card{background:#1c1c1c;border:1px solid #51431b;border-radius:12px;padding:17px;margin:13px 0}
+h2,h3{color:#e6c45a}
+input,textarea{width:100%;padding:12px;margin:7px 0 13px;border-radius:7px;border:1px solid #777;background:#292929;color:white;font-size:16px}
+label{color:#ddd}
+.stat{display:inline-block;background:#292929;padding:15px;border-radius:9px;margin:5px;min-width:125px}
+.stat strong{display:block;color:#e6c45a;font-size:25px}
+.member{border:1px solid #51431b;padding:12px;border-radius:9px;margin:10px 0;background:#222}
+.small{color:#aaa;font-size:13px}
+.gold{color:#e6c45a}
+.profile-photo{width:115px;height:115px;border-radius:50%;object-fit:cover;border:3px solid #c9a227}
+.id-card{max-width:420px;margin:18px auto;background:#fff;color:#171717;border:4px solid #c9a227;border-radius:12px;padding:16px;text-align:center}
+.id-card h2{color:#8a6810;margin:3px}
+.id-card .id-photo{width:105px;height:105px;object-fit:cover;border:2px solid #c9a227;border-radius:8px;margin:10px}
+.id-card p{margin:7px;font-size:14px}
+.id-card .card-footer{background:#171717;color:#e6c45a;padding:9px;margin:12px -16px -16px;border-radius:0 0 7px 7px}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid #444;overflow-wrap:anywhere}
+footer{text-align:center;color:#888;padding:25px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>UJJVAL SAMITI</h1>
+<p>संगठन • एकता • विकास</p>
+</header>
+
+<nav>
+<button onclick="show('home')">होम</button>
+<button onclick="show('register')">सदस्य पंजीकरण</button>
+<button onclick="show('memberLogin')">सदस्य लॉगिन</button>
+<button onclick="show('adminLogin')">Admin Login</button>
+<button class="secondary" onclick="adminLogout()">Admin Logout</button>
+</nav>
+
+<main>
+
+<section id="home" class="section active">
+<div class="card">
+<h2>UJJVAL SAMITI में आपका स्वागत है</h2>
+<p>हमारी समिति के डिजिटल प्लेटफॉर्म पर आपका स्वागत है।</p>
+<div class="stat"><strong id="totalMembers">0</strong>कुल सदस्य</div>
+<div class="stat"><strong id="activeMembers">0</strong>सक्रिय सदस्य</div>
+</div>
+<div class="card">
+<h3>हमारी सुविधाएँ</h3>
+<p>• सदस्य पंजीकरण</p>
+<p>• सदस्य लॉगिन और प्रोफाइल</p>
+<p>• डिजिटल Member ID Card</p>
+<p>• Admin Panel और डेटा बैकअप</p>
+</div>
+</section>
+
+<section id="register" class="section">
+<div class="card">
+<h2>नया सदस्य पंजीकरण</h2>
+<form onsubmit="saveMember(event)">
+<label>सदस्य का पूरा नाम</label>
+<input id="name" required placeholder="पूरा नाम">
+
+<label>मोबाइल नंबर</label>
+<input id="phone" required type="tel" maxlength="10" pattern="[0-9]{10}" placeholder="10 अंकों का मोबाइल नंबर">
+
+<label>गाँव</label>
+<input id="village" required placeholder="गाँव का नाम">
+
+<label>पूरा पता</label>
+<textarea id="address" placeholder="सदस्य का पता"></textarea>
+
+<label>सदस्य की फोटो</label>
+<input id="photo" type="file" accept="image/*">
+<p class="small">फोटो JPG या PNG हो। अधिकतम आकार 1 MB रखें।</p>
+
+<button type="submit">सदस्य पंजीकृत करें</button>
+</form>
+</div>
+</section>
+
+<section id="memberLogin" class="section">
+<div class="card">
+<h2>सदस्य लॉगिन</h2>
+<p>पंजीकरण के समय दिया गया मोबाइल नंबर डालें।</p>
+<label>मोबाइल नंबर</label>
+<input id="memberPhone" type="tel" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर">
+<button onclick="memberLogin()">लॉगिन करें</button>
+<p id="memberError" style="color:#ff7777"></p>
+</div>
+</section>
+
+<section id="memberProfile" class="section">
+<div class="card">
+<h2>मेरी सदस्य प्रोफाइल</h2>
+<div id="memberDetails"></div>
+<button onclick="printCard()">मेरा ID कार्ड प्रिंट करें</button>
+<button class="secondary" onclick="memberLogout()">लॉगआउट</button>
+</div>
+<div class="card">
+<h3>डिजिटल सदस्य पहचान पत्र</h3>
+<div id="idCard"></div>
+</div>
+</section>
+
+<section id="adminLogin" class="section">
+<div class="card">
+<h2>Admin Login</h2>
+<label>Username</label>
+<input id="adminUser" placeholder="Admin username">
+<label>Password</label>
+<input id="adminPass" type="password" placeholder="Admin password">
+<button onclick="loginAdmin()">लॉगिन करें</button>
+<p id="adminError" style="color:#ff7777"></p>
+<p class="small">डेमो लॉगिन: admin / Ujjval@123</p>
+</div>
+</section>
+
+<section id="adminPanel" class="section">
+<div class="card">
+<h2>UJJVAL SAMITI ADMIN PANEL</h2>
+<div class="stat"><strong id="adminTotal">0</strong>कुल सदस्य</div>
+<div class="stat"><strong id="adminActive">0</strong>सक्रिय सदस्य</div>
+</div>
+<div class="card">
+<h3>सदस्य खोजें</h3>
+<input id="search" placeholder="नाम या मोबाइल नंबर से खोजें" oninput="renderMembers()">
+<div id="memberList"></div>
+</div>
+<div class="card">
+<h3>डेटा बैकअप</h3>
+<button onclick="exportData()">सदस्य डेटा डाउनलोड करें</button>
+<p class="small">अपनी बैकअप फाइल सुरक्षित रखें।</p>
+</div>
+</section>
+
+</main>
+
+<footer>© UJJVAL SAMITI | Digital Member System</footer>
+
+<script>
+const STORAGE_KEY="ujj_members";
+
+function getMembers(){
+ try{
+  const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+  return Array.isArray(data)?data:[];
+ }catch(e){return [];}
+}
+
+function setMembers(data){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}
+
+function safe(value){
+ return String(value??"").replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+ });
+}
+
+function show(id){
+ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+ const section=document.getElementById(id);
+ if(section)section.classList.add("active");
+
+ if(id==="home")updateDashboard();
+
+ if(id==="adminPanel"){
+  if(sessionStorage.getItem("ujj_admin")!=="yes"){
+   alert("पहले Admin Login करें");
+   show("adminLogin");
+   return;
+  }
+  renderMembers();
+ }
+}
+
+function updateDashboard(){
+ const members=getMembers();
+ document.getElementById("totalMembers").textContent=members.length;
+ document.getElementById("activeMembers").textContent=members.filter(m=>m.status!=="Inactive").length;
+}
+
+function saveMember(event){
+ event.preventDefault();
+
+ const name=document.getElementById("name").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const village=document.getElementById("village").value.trim();
+ const address=document.getElementById("address").value.trim();
+ const photoFile=document.getElementById("photo").files[0];
+
+ if(!/^[0-9]{10}$/.test(phone)){
+  alert("सही 10 अंकों का मोबाइल नंबर डालें");
+  return;
+ }
+
+ const members=getMembers();
+
+ if(members.some(m=>String(m.phone)===phone)){
+  alert("यह मोबाइल नंबर पहले से पंजीकृत है");
+  return;
+ }
+
+ if(photoFile && photoFile.size>1024*1024){
+  alert("फोटो 1 MB से छोटी रखें");
+  return;
+ }
+
+ function finishRegistration(photoData){
+  const newMember={
+   id:"UJJ"+Date.now().toString().slice(-8),
+   name:name,
+   phone:phone,
+   village:village,
+   address:address,
+   photo:photoData||"",
+   joinDate:new Date().toLocaleDateString("hi-IN"),
+   status:"Active"
+  };
+
+  members.push(newMember);
+
+  try{
+   setMembers(members);
+  }catch(e){
+   alert("डेटा सेव नहीं हुआ। फोटो छोटी करके दोबारा प्रयास करें।");
+   return;
+  }
+
+  event.target.reset();
+  updateDashboard();
+  alert("सदस्य पंजीकरण सफल! Member ID: "+newMember.id);
+  show("home");
+ }
+
+ if(photoFile){
+  const reader=new FileReader();
+  reader.onload=function(){
+   finishRegistration(reader.result);
+  };
+  reader.onerror=function(){
+   alert("फोटो पढ़ने में समस्या हुई");
+  };
+  reader.readAsDataURL(photoFile);
+ }else{
+  finishRegistration("");
+ }
+}
+
+function memberLogin(){
+ const phone=document.getElementById("memberPhone").value.trim();
+ const error=document.getElementById("memberError");
+ error.textContent="";
+
+ if(!/^[0-9]{10}$/.test(phone)){
+  error.textContent="सही 10 अंकों का मोबाइल नंबर डालें";
+  return;
+ }
+
+ const member=getMembers().find(m=>String(m.phone)===phone);
+
+ if(!member){
+  error.textContent="यह नंबर पंजीकृत नहीं है";
+  return;
+ }
+
+ if(member.status==="Inactive"){
+  error.textContent="आपकी सदस्यता निष्क्रिय है। Admin से संपर्क करें।";
+  return;
+ }
+
+ sessionStorage.setItem("ujj_member_phone",phone);
+ showMemberProfile();
+}
+
+function showMemberProfile(){
+ const phone=sessionStorage.getItem("ujj_member_phone");
+ const member=getMembers().find(m=>String(m.phone)===phone);
+
+ if(!member){
+  sessionStorage.removeItem("ujj_member_phone");
+  show("memberLogin");
+  return;
+ }
+
+ const photo=member.photo
+  ? `<img class="profile-photo" src="${member.photo}" alt="सदस्य फोटो">`
+  : `<div class="profile-photo" style="display:flex;align-items:center;justify-content:center;margin:auto;color:#e6c45a">फोटो नहीं</div>`;
+
+ document.getElementById("memberDetails").innerHTML=`
+ <div style="text-align:center;margin:15px">${photo}</div>
+ <table>
+ <tr><td>Member ID</td><td class="gold">${safe(member.id)}</td></tr>
+ <tr><td>नाम</td><td>${safe(member.name)}</td></tr>
+ <tr><td>मोबाइल</td><td>${safe(member.phone)}</td></tr>
+ <tr><td>गाँव</td><td>${safe(member.village)}</td></tr>
+ <tr><td>पता</td><td>${safe(member.address||"—")}</td></tr>
+ <tr><td>सदस्यता तारीख</td><td>${safe(member.joinDate||"—")}</td></tr>
+ <tr><td>स्थिति</td><td class="gold">${safe(member.status||"Active")}</td></tr>
+ </table>`;
+
+ document.getElementById("idCard").innerHTML=makeCard(member);
+ show("memberProfile");
+}
+
+function makeCard(member){
+ const photo=member.photo
+ ? `<img class="id-photo" src="${member.photo}" alt="Photo">`
+ : `<div class="id-photo" style="display:inline-flex;align-items:center;justify-content:center">PHOTO</div>`;
+
+ return `
+ <div class="id-card">
+  <h2>UJJVAL SAMITI</h2>
+  <p><b>MEMBER IDENTITY CARD</b></p>
+  ${photo}
+  <h2>${safe(member.name)}</h2>
+  <p><b>Member ID:</b> ${safe(member.id)}</p>
+  <p><b>Mobile:</b> ${safe(member.phone)}</p>
+  <p><b>Village:</b> ${safe(member.village)}</p>
+  <p><b>Join Date:</b> ${safe(member.joinDate||"—")}</p>
+  <div class="card-footer">संगठन • एकता • विकास</div>
+ </div>`;
+}
+
+function printCard(){
+ const phone=sessionStorage.getItem("ujj_member_phone");
+ const member=getMembers().find(m=>String(m.phone)===phone);
+ if(!member){
+  alert("सदस्य लॉगिन करें");
+  return;
+ }
+
+ const win=window.open("","_blank");
+ if(!win){
+  alert("ब्राउज़र में Pop-up की अनुमति दें");
+  return;
+ }
+
+ win.document.write(`
+ <!DOCTYPE html>
+ <html><head><meta charset="UTF-8">
+ <title>UJJVAL SAMITI ID Card</title>
+ <style>
+ body{font-family:Arial;text-align:center;padding:20px}
+ .id-card{max-width:420px;margin:20px auto;background:white;color:#171717;border:4px solid #c9a227;border-radius:12px;padding:16px;text-align:center}
+ .id-card h2{color:#8a6810;margin:3px}
+ .id-photo{width:105px;height:105px;object-fit:cover;border:2px solid #c9a227;border-radius:8px;margin:10px}
+ .id-card p{margin:7px;font-size:14px}
+ .card-footer{background:#171717;color:#e6c45a;padding:9px;margin:12px -16px -16px}
+ </style></head><body>
+ ${makeCard(member)}
+ <script>window.onload=function(){window.print()}<\/script>
+ </body></html>`);
+ win.document.close();
+}
+
+function memberLogout(){
+ sessionStorage.removeItem("ujj_member_phone");
+ document.getElementById("memberPhone").value="";
+ alert("सदस्य लॉगआउट सफल");
+ show("home");
+}
+
+function loginAdmin(){
+ const user=document.getElementById("adminUser").value;
+ const pass=document.getElementById("adminPass").value;
+
+ if(user==="admin" && pass==="Ujjval@123"){
+  sessionStorage.setItem("ujj_admin","yes");
+  document.getElementById("adminError").textContent="";
+  document.getElementById("adminPass").value="";
+  alert("Admin Login सफल!");
+  show("adminPanel");
+ }else{
+  document.getElementById("adminError").textContent="गलत Username या Password";
+ }
+}
+
+function adminLogout(){
+ sessionStorage.removeItem("ujj_admin");
+ alert("Admin Logout हो गया");
+ show("home");
+}
+
+function renderMembers(){
+ if(sessionStorage.getItem("ujj_admin")!=="yes")return;
+
+ const members=getMembers();
+ const q=(document.getElementById("search").value||"").toLowerCase();
+
+ const filtered=members.filter(m=>
+  String(m.name||"").toLowerCase().includes(q)||
+  String(m.phone||"").includes(q)||
+  String(m.id||"").toLowerCase().includes(q)
+ );
+
+ document.getElementById("adminTotal").textContent=members.length;
+ document.getElementById("adminActive").textContent=members.filter(m=>m.status!=="Inactive").length;
+
+ const list=document.getElementById("memberList");
+
+ if(filtered.length===0){
+  list.innerHTML="<p>कोई सदस्य नहीं मिला।</p>";
+  return;
+ }
+
+ list.innerHTML=filtered.map(m=>`
+ <div class="member">
+ <h3>${safe(m.name)}</h3>
+ <p>Member ID: <span class="gold">${safe(m.id)}</span></p>
+ <p>मोबाइल: ${safe(m.phone)}</p>
+ <p>गाँव: ${safe(m.village)}</p>
+ <p>स्थिति: ${safe(m.status||"Active")}</p>
+ <button onclick="toggleStatus('${safe(m.id)}')">
+ ${m.status==="Inactive"?"सक्रिय करें":"निष्क्रिय करें"}
+ </button>
+ </div>`).join("");
+}
+
+function toggleStatus(id){
+ const members=getMembers();
+ const member=members.find(m=>String(m.id)===id);
+ if(!member)return;
+
+ member.status=member.status==="Inactive"?"Active":"Inactive";
+ setMembers(members);
+ renderMembers();
+ updateDashboard();
+}
+
+function exportData(){
+ if(sessionStorage.getItem("ujj_admin")!=="yes"){
+  alert("पहले Admin Login करें");
+  return;
+ }
+
+ const blob=new Blob([JSON.stringify(getMembers(),null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="ujjval-samiti-members.json";
+ a.click();
+ URL.revokeObjectURL(url);
+}
+
+updateDashboard();
+
+if(sessionStorage.getItem("ujj_member_phone")){
+ showMemberProfile();
+}
+</script>
+</body>
+</html>
