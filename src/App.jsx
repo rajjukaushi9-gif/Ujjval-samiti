@@ -1,13 +1,7 @@
-import { useEffect, useState } from "react";
-import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  onAuthStateChanged,
-  signOut
-} from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { useState } from "react";
 import "./App.css";
+
+const TEST_OTP = "123456";
 
 const money = (n) =>
   new Intl.NumberFormat("en-IN", {
@@ -19,35 +13,15 @@ const money = (n) =>
 function App() {
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
-  const [confirmation, setConfirmation] = useState(null);
+  const [confirmation, setConfirmation] = useState(false);
   const [user, setUser] = useState(null);
   const [role, setRole] = useState("member");
+  const [selectedRole, setSelectedRole] = useState("member");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [tab, setTab] = useState("home");
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) return;
-
-      try {
-        const snap = await getDoc(doc(db, "users", currentUser.uid));
-        setRole(
-          snap.exists() && snap.data().role === "admin"
-            ? "admin"
-            : "member"
-        );
-      } catch (error) {
-        console.error(error);
-        setMessage("प्रोफाइल लोड नहीं हो सकी।");
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  async function sendOTP() {
+  function sendOTP() {
     if (!/^[0-9]{10}$/.test(mobile)) {
       setMessage("कृपया 10 अंकों का मोबाइल नंबर डालें।");
       return;
@@ -56,63 +30,44 @@ function App() {
     setLoading(true);
     setMessage("");
 
-    try {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-      }
-
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        { size: "normal" }
-      );
-
-      const result = await signInWithPhoneNumber(
-        auth,
-        "+91" + mobile,
-        window.recaptchaVerifier
-      );
-
-      setConfirmation(result);
-      setMessage("OTP भेज दिया गया है।");
-    } catch (error) {
-      console.error(error);
-      setMessage(error.message || "OTP भेजने में समस्या आई।");
-
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-        window.recaptchaVerifier = null;
-      }
-    } finally {
+    setTimeout(() => {
+      setConfirmation(true);
+      setMessage("आपका टेस्ट OTP है: 123456");
       setLoading(false);
-    }
+    }, 400);
   }
 
-  async function verifyOTP() {
-    if (!confirmation || !/^[0-9]{6}$/.test(otp)) {
+  function verifyOTP() {
+    if (!/^[0-9]{6}$/.test(otp)) {
       setMessage("कृपया 6 अंकों का OTP डालें।");
+      return;
+    }
+
+    if (otp !== TEST_OTP) {
+      setMessage("गलत OTP! कृपया 123456 डालें।");
       return;
     }
 
     setLoading(true);
 
-    try {
-      await confirmation.confirm(otp);
-      setMessage("लॉगिन सफल!");
-    } catch (error) {
-      console.error(error);
-      setMessage("OTP गलत या समाप्त हो गया है।");
-    } finally {
+    setTimeout(() => {
+      setRole(selectedRole);
+      setUser({
+        phoneNumber: "+91 " + mobile
+      });
+      setTab("home");
+      setMessage("");
       setLoading(false);
-    }
+    }, 400);
   }
 
-  async function logout() {
-    await signOut(auth);
-    setConfirmation(null);
-    setOtp("");
+  function logout() {
+    setUser(null);
     setMobile("");
+    setOtp("");
+    setConfirmation(false);
     setRole("member");
+    setSelectedRole("member");
     setTab("home");
     setMessage("आप लॉगआउट हो गए हैं।");
   }
@@ -149,12 +104,25 @@ function App() {
           <div className="brand-mark">US</div>
           <p className="eyebrow">संगठन • एकता • विकास</p>
           <h1>UJJVAL <span>SAMITI</span></h1>
-          <p className="auth-subtitle">बचत एवं लोन समिति प्रबंधन</p>
+          <p className="auth-subtitle">
+            उज्जवल दुर्गोत्सव समिति
+          </p>
 
           <div className="auth-card">
             <div className="card-icon">✦</div>
             <h2>आपका स्वागत है</h2>
-            <p className="muted">अपने मोबाइल नंबर से सुरक्षित लॉगिन करें</p>
+            <p className="muted">
+              मोबाइल नंबर से टेस्ट लॉगिन करें
+            </p>
+
+            <label>लॉगिन का प्रकार</label>
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+            >
+              <option value="member">Member - सदस्य</option>
+              <option value="admin">Admin - व्यवस्थापक</option>
+            </select>
 
             <label>मोबाइल नंबर</label>
             <div className="phone-field">
@@ -171,25 +139,34 @@ function App() {
               />
             </div>
 
-            <div id="recaptcha-container" />
-
             {!confirmation ? (
               <button
                 className="primary-btn"
                 onClick={sendOTP}
                 disabled={loading}
               >
-                {loading ? "OTP भेज रहे हैं..." : "OTP प्राप्त करें"}
+                {loading ? "कृपया प्रतीक्षा करें..." : "OTP प्राप्त करें"}
                 <span>→</span>
               </button>
             ) : (
               <>
-                <label className="otp-label">6 अंकों का OTP</label>
+                <label className="otp-label">
+                  6 अंकों का टेस्ट OTP
+                </label>
+
+                <div className="notice-card">
+                  <span>🔐</span>
+                  <div>
+                    <strong>आपका टेस्ट OTP</strong>
+                    <p>123456</p>
+                  </div>
+                </div>
+
                 <input
                   className="otp-input"
                   inputMode="numeric"
                   maxLength="6"
-                  placeholder="● ● ● ● ● ●"
+                  placeholder="123456"
                   value={otp}
                   onChange={(e) =>
                     setOtp(e.target.value.replace(/\D/g, ""))
@@ -208,7 +185,7 @@ function App() {
                 <button
                   className="text-btn"
                   onClick={() => {
-                    setConfirmation(null);
+                    setConfirmation(false);
                     setOtp("");
                     setMessage("");
                   }}
@@ -218,10 +195,18 @@ function App() {
               </>
             )}
 
-            {message && <p className="status-message">{message}</p>}
+            {message && (
+              <p className="status-message">{message}</p>
+            )}
+
+            <p className="muted">
+              यह केवल टेस्ट लॉगिन है। असली SMS नहीं भेजा जाता।
+            </p>
           </div>
 
-          <p className="secure-note">♧ आपका डेटा सुरक्षित रखा जाता है</p>
+          <p className="secure-note">
+            ♧ उज्जवल दुर्गोत्सव समिति
+          </p>
         </section>
 
         <footer className="auth-footer">
@@ -245,7 +230,6 @@ function App() {
         <button
           className="avatar"
           onClick={() => setTab("profile")}
-          aria-label="प्रोफाइल"
         >
           {admin ? "A" : "M"}
         </button>
@@ -256,7 +240,9 @@ function App() {
           <section className="welcome-row">
             <div>
               <p className="muted">नमस्कार, स्वागत है 👋</p>
-              <h2>{admin ? "Admin Dashboard" : "Member Dashboard"}</h2>
+              <h2>
+                {admin ? "Admin Dashboard" : "Member Dashboard"}
+              </h2>
               <span className="role-pill">
                 {admin ? "ADMIN ACCOUNT" : "MEMBER ACCOUNT"}
               </span>
@@ -340,15 +326,19 @@ function App() {
             <div className="content-symbol">
               {menu.find((m) => m[0] === tab)?.[1] || "♙"}
             </div>
+
             <h2>{title}</h2>
+
             <p className="muted">
               {tab === "profile"
-                ? `मोबाइल नंबर: ${user.phoneNumber || "उपलब्ध नहीं"}`
+                ? `मोबाइल नंबर: ${user.phoneNumber}`
                 : "इस सुविधा का लेन-देन और डेटा प्रबंधन अगले विकास चरण में जोड़ा जाएगा।"}
             </p>
 
             {tab === "profile" && (
-              <p className="role-pill">{admin ? "ADMIN" : "MEMBER"}</p>
+              <p className="role-pill">
+                {admin ? "ADMIN" : "MEMBER"}
+              </p>
             )}
 
             <div className="empty-state">

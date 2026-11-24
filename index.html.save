@@ -1,0 +1,139 @@
+cd ~/ujjwal-samiti
+nano index.html
+xpython -m http.server 8000
+mm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+HTML
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UJJVAL SAMITI</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f1f4f8;
+}
+header{
+background:#075e54;
+color:white;
+padding:25px;
+text-align:center;
+}
+.card{
+background:white;
+margin:20px;
+padding:25px;
+border-radius:15px;
+box-shadow:0 4px 15px #ccc;
+}
+input,button{
+width:100%;
+padding:14px;
+margin:10px 0;
+border-radius:8px;
+font-size:16px;
+}
+input{
+border:1px solid #ccc;
+}
+button{
+background:#075e54;
+color:white;
+border:none;
+font-weight:bold;
+}
+h2{text-align:center;color:#075e54}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<header>
+<h1>UJJVAL SAMITI</h1>
+<p>समिति प्रबंधन प्रणाली</p>
+</header>
+
+<div class="card" id="login">
+<h2>मोबाइल लॉगिन</h2>
+<input type="tel" id="mobile"
+placeholder="10 अंकों का मोबाइल नंबर"
+maxlength="10">
+<button onclick="sendOTP()">OTP प्राप्त करें</button>
+</div>
+
+<div class="card hidden" id="verify">
+<h2>OTP सत्यापन</h2>
+<p>टेस्ट OTP: 123456</p>
+<input type="number" id="otp" placeholder="6 अंकों का OTP">
+<button onclick="verifyOTP()">लॉगिन करें</button>
+</div>
+
+<div class="card hidden" id="home">
+<h2>UJJVAL SAMITI</h2>
+<p id="welcome"></p>
+<hr>
+<h3>मुख्य सुविधाएँ</h3>
+<p>👤 सदस्य प्रोफाइल</p>
+<p>💰 जमा राशि</p>
+<p>📋 सदस्य सूची</p>
+<p>📊 हिसाब किताब</p>
+<p>📅 किस्त रिकॉर्ड</p>
+<button onclick="logout()">लॉगआउट</button>
+</div>
+
+<script>
+function sendOTP(){
+let m=document.getElementById("mobile").value;
+if(!/^[0-9]{10}$/.test(m)){
+alert("10 अंकों का मोबाइल नंबर डालें");
+return;
+}
+document.getElementById("login").classList.add("hidden");
+document.getElementById("verify").classList.remove("hidden");
+alert("टेस्ट OTP: 123456");
+}
+
+function verifyOTP(){
+let o=document.getElementById("otp").value;
+if(o==="123456"){
+document.getElementById("verify").classList.add("hidden");
+document.getElementById("home").classList.remove("hidden");
+document.getElementById("welcome").innerText=
+"आपका स्वागत है! मोबाइल: "+document.getElementById("mobile").value;
+}else{
+alert("गलत OTP! टेस्ट OTP 123456 डालें");
+}
+}
+
+function logout(){
+document.getElementById("home").classList.add("hidden");
+document.getElementById("login").classList.remove("hidden");
+document.getElementById("otp").value="";
+}
+</script>
+
+</body>
+</html>
+
