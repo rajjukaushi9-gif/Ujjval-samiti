@@ -1,4 +1,4 @@
-package com.ujjval.samiti;
+package com.ujjval.durgotsavsamiti;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -1,6 +1,6 @@
 {
-  "appId": "com.ujjval.samiti",
-  "appName": "UJJVAL SAMITI",
+  "appId": "com.ujjval.durgotsavsamiti",
+  "appName": "उज्जवल दुर्गोत्सव समिति",
   "webDir": "dist",
   "plugins": {
     "LiveUpdate": {

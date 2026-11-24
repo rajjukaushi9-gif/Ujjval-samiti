@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">UJJVAL SAMITI</string>
-    <string name="title_activity_main">UJJVAL SAMITI</string>
-    <string name="package_name">com.ujjval.samiti</string>
-    <string name="custom_url_scheme">com.ujjval.samiti</string>
+    <string name="app_name">उज्जवल दुर्गोत्सव समिति</string>
+    <string name="title_activity_main">उज्जवल दुर्गोत्सव समिति</string>
+    <string name="package_name">com.ujjval.durgotsavsamiti</string>
+    <string name="custom_url_scheme">com.ujjval.durgotsavsamiti</string>
 </resources>

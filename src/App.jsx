@@ -225,7 +225,7 @@ function App() {
         </section>
 
         <footer className="auth-footer">
-          © {new Date().getFullYear()} UJJVAL SAMITI
+          © {new Date().getFullYear()} उज्जवल दुर्गोत्सव समिति
         </footer>
       </main>
     );
@@ -237,7 +237,7 @@ function App() {
         <div className="brand-small">
           <div className="mini-mark">US</div>
           <div>
-            <strong>UJJVAL SAMITI</strong>
+            <strong>उज्जवल दुर्गोत्सव समिति</strong>
             <small>बचत एवं लोन समिति</small>
           </div>
         </div>
@@ -276,7 +276,7 @@ function App() {
             <div className="hero-divider" />
 
             <div className="hero-bottom">
-              <span>UJJVAL SAMITI</span>
+              <span>उज्जवल दुर्गोत्सव समिति</span>
               <span>वित्तीय सारांश</span>
             </div>
             <div className="hero-watermark">US</div>
@@ -328,7 +328,7 @@ function App() {
         <>
           <section className="welcome-row">
             <div>
-              <p className="muted">UJJVAL SAMITI</p>
+              <p className="muted">उज्जवल दुर्गोत्सव समिति</p>
               <h2>{title}</h2>
               <span className="role-pill">
                 {admin ? "ADMIN ACCOUNT" : "MEMBER ACCOUNT"}
