@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "live-updates",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

@@ -1,5 +1,11 @@
 {
   "appId": "com.ujjval.samiti",
   "appName": "UJJVAL SAMITI",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "LiveUpdate": {
+      "readyTimeout": 10000,
+      "autoBlockRolledBackBundles": true
+    }
+  }
 }
