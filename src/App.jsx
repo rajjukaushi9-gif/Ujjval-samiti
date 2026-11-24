@@ -27,6 +27,11 @@ function App() {
       return;
     }
 
+    if (mobile !== "9340558265") {
+      setMessage("यह टेस्ट लॉगिन केवल अधिकृत मोबाइल नंबर के लिए है।");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
