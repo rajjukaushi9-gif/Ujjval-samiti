@@ -313,6 +313,7 @@ function App() {
             <div>
               <strong>महत्वपूर्ण सूचना</strong>
               <p>यहाँ समिति की नई सूचनाएँ दिखाई देंगी।</p>
+              <p style={{color:"#16a34a",fontWeight:"bold"}}>🎉 LIVE UPDATE TEST SUCCESSFUL - नया अपडेट सफलतापूर्वक मिला!</p>
             </div>
           </section>
         </>
