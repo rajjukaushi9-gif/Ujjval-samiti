@@ -1,4 +1,5 @@
 import { useState } from "react";
+import durgaImage from "./assets/maa-durga.jpg";
 import "./App.css";
 
 const TEST_OTP = "123456";
@@ -106,7 +107,7 @@ function App() {
         <div className="auth-glow glow-two" />
 
         <section className="auth-wrap">
-          <div className="brand-mark">US</div>
+          <div className="brand-mark"><img src={durgaImage} alt="माँ दुर्गा" /></div>
           <p className="eyebrow">संगठन • एकता • विकास</p>
           <h1>UJJVAL <span>SAMITI</span></h1>
           <p className="auth-subtitle">
@@ -225,7 +226,7 @@ function App() {
     <main className="dashboard-shell">
       <header className="topbar">
         <div className="brand-small">
-          <div className="mini-mark">US</div>
+          <div className="mini-mark"><img src={durgaImage} alt="माँ दुर्गा" /></div>
           <div>
             <strong>उज्जवल दुर्गोत्सव समिति</strong>
             <small>बचत एवं लोन समिति</small>

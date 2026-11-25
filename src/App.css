@@ -667,3 +667,13 @@ button {
     padding: 10px;
   }
 }
+
+/* माँ दुर्गा लोगो */
+.brand-mark img,
+.mini-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
